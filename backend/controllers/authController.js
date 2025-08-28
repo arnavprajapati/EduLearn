@@ -16,7 +16,7 @@ const signUp = async (req, res) => {
         const token = await generateAuthToken(user._id)
         res.cookie("token", token, {
             httpOnly: true,
-            secure: false, // production me true rakhna
+            secure: false,
             sameSite: "Strict",
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
