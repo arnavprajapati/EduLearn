@@ -17,6 +17,11 @@ cors({
     allowedHeaders: ['Content-Type', 'Authorization'],
 })
 
+app.use(express.json());
+
+import authRouter from './routes/authRoute.js'
+
+app.use('/api/auth', authRouter)
 
 mongoose
     .connect(MONGO_URI)
