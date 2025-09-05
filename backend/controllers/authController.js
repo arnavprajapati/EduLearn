@@ -138,5 +138,36 @@ const resetPassword = async (req, res) => {
     }
 }
 
+const googleSignup = async (req, res) => {
+    try {
+        const { name, email, role } = req.body;
 
-export { signUp, login, logout, sendOTP, verifyOTP, resetPassword }
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            user = await User.create({
+                name,
+                email,
+                role: role || "student",
+            });
+        }
+
+        const token = await generateAuthToken(user._id);
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: false, 
+            sameSite: "Strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        return res.status(200).json(user);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: `googleSignup error: ${error.message}` });
+    }
+};
+
+
+
+export { signUp, login, logout, sendOTP, verifyOTP, resetPassword, googleSignup }

@@ -8,6 +8,8 @@ import { toast } from 'react-toastify'
 import ClipLoader from "react-spinners/ClipLoader";
 import { useDispatch } from "react-redux";
 import { setUserData } from "../store/slice/userSlice.js";
+import { signInWithPopup } from "firebase/auth";
+import { auth, provider } from "../utils/firebase.js";
 
 const SignUpPage = () => {
     const navigate = useNavigate();
@@ -52,6 +54,30 @@ const SignUpPage = () => {
             setLoading(false);
         }
     };
+
+    const handleGoogleLogin = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const response = await signInWithPopup(auth, provider)
+
+            const user = response.user
+            const name = user.displayName;
+            const email = user.email
+            const role = formData.role
+            const result = await axios.post(serverURL + "/api/auth/google-signup", { name, email, role }
+                , { withCredentials: true }
+            )
+            dispatch(setUserData(result.data))
+            navigate("/")
+            toast.success("SignUp Successfully")
+        } catch (error) {
+            console.log(error);
+            toast.error(error.response.data.message)
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <div className="min-h-screen bg-white text-gray-900 flex items-center justify-center p-4">
@@ -149,7 +175,7 @@ const SignUpPage = () => {
                     <div className="flex-1 border-t border-gray-300"></div>
                 </div>
 
-                <button className="w-full flex items-center justify-center gap-2 border border-gray-300 py-3 rounded-lg hover:bg-gray-100 transition">
+                <button className="w-full flex items-center justify-center gap-2 border border-gray-300 py-3 rounded-lg hover:bg-gray-100 transition" onClick={handleGoogleLogin}>
                     <FaGoogle className="text-red-500" />
                     <span>Sign up with Google</span>
                 </button>
