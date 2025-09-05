@@ -6,12 +6,16 @@ import { serverURL } from "../App.jsx";
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify'
 import ClipLoader from "react-spinners/ClipLoader";
-
+import { useDispatch } from "react-redux";
+import { setUserData } from "../store/slice/userSlice.js";
 
 const SignUpPage = () => {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    const dispatch = useDispatch();
+
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -19,18 +23,15 @@ const SignUpPage = () => {
         role: "student",
     });
 
-    // Handle input change
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Handle user type toggle
     const handleRole = (type) => {
         setFormData((prev) => ({ ...prev, role: type }));
     };
 
-    // Handle form submit
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log("Form Data:", formData);
@@ -39,6 +40,7 @@ const SignUpPage = () => {
             const result = await axios.post(serverURL + "/api/auth/signup", formData, {
                 withCredentials: true
             });
+            dispatch(setUserData(result.data));
             console.log(result.data);
             navigate("/");
             setLoading(false);

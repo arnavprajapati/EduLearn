@@ -5,11 +5,16 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
 import { serverURL } from "../App.jsx";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../store/slice/userSlice.js";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const dispatch = useDispatch();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -28,6 +33,7 @@ const LoginPage = () => {
         withCredentials: true,
       });
       console.log(result.data);
+      dispatch(setUserData(result.data));
       toast.success("Login Successful");
       navigate("/"); 
     } catch (error) {
