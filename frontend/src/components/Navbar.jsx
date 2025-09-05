@@ -42,7 +42,7 @@ const Navbar = () => {
         <nav className="fixed top-0 left-0 w-full h-[70px] flex items-center justify-between px-5 md:px-20 bg-white shadow-md z-50">
             <div className="flex-1">
                 <Link to="/" className="text-xl font-bold text-gray-800 tracking-wide" onClick={() => setShowMobileMenu(false)}>
-                    NextLearn
+                    EduLearn
                 </Link>
             </div>
 

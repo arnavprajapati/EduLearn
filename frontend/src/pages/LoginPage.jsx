@@ -35,7 +35,7 @@ const LoginPage = () => {
       console.log(result.data);
       dispatch(setUserData(result.data));
       toast.success("Login Successful");
-      navigate("/"); 
+      navigate("/");
     } catch (error) {
       console.log(error);
       toast.error(error?.response?.data?.message || "Login failed");
@@ -83,7 +83,11 @@ const LoginPage = () => {
               className="w-full pl-10 bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
-
+          <div className="flex justify-end text-sm">
+            <Link to="/forgot-password" className="text-black hover:underline">
+              Forgot Password?
+            </Link>
+          </div>
           <button
             type="submit"
             className="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-gray-800 transition"

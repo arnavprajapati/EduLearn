@@ -48,7 +48,7 @@ const SignUpPage = () => {
         } catch (error) {
             console.log(error);
             toast.error(error.response.data.message)
-        }finally{
+        } finally {
             setLoading(false);
         }
     };
@@ -127,6 +127,12 @@ const SignUpPage = () => {
                             required
                             className="w-full pl-10 bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
                         />
+                    </div>
+
+                    <div className="text-right text-sm">
+                        <Link to="/forgot-password" className="text-gray-600 hover:underline">
+                            Forgot Password?
+                        </Link>
                     </div>
 
                     <button

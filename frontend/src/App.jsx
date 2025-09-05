@@ -6,20 +6,41 @@ import LoginPage from './pages/LoginPage.jsx'
 import { ToastContainer } from 'react-toastify'
 import { getCurrentUser } from './hooks/getCurrentUser.js'
 import { useSelector } from 'react-redux'
+import Profile from './pages/Profile.jsx'
+import ForgotPassword from './pages/ForgotPassword.jsx'
 
 export const serverURL = 'http://localhost:5000'
 
 const App = () => {
-  const { userData } = useSelector((state) => state.user) 
+  const { userData } = useSelector((state) => state.user)
   getCurrentUser()
   console.log("userdata: ", userData);
   return (
     <>
       <ToastContainer />
       <Routes>
-        <Route path='/' element={ <Home />} />
-        <Route path='/signup' element={ userData ? <Navigate to='/' /> : <SignUpPage />} />
-        <Route path='/login' element={<LoginPage />} />
+        <Route path='/' element={<Home />} />
+
+        <Route
+          path='/signup'
+          element={userData ? <Navigate to='/' /> : <SignUpPage />}
+        />
+
+        <Route
+          path='/login'
+          element={userData ? <Navigate to='/' /> : <LoginPage />}
+        />
+
+        <Route
+          path='/profile'
+          element={userData ? <Profile /> : <Navigate to='/login' />}
+        />
+
+        <Route
+          path='/forgot-password'
+          element={<ForgotPassword />}
+        />
+
       </Routes>
     </>
   )
