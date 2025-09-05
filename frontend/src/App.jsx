@@ -4,16 +4,21 @@ import Home from './pages/Home'
 import SignUpPage from './pages/SignUpPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import { ToastContainer } from 'react-toastify'
+import { getCurrentUser } from './hooks/getCurrentUser.js'
+import { useSelector } from 'react-redux'
 
 export const serverURL = 'http://localhost:5000'
 
 const App = () => {
+  const { userData } = useSelector((state) => state.user) 
+  getCurrentUser()
+  console.log("userdata: ", userData);
   return (
     <>
       <ToastContainer />
       <Routes>
-        <Route path='/' element={<Home />} />
-        <Route path='/signup' element={<SignUpPage />} />
+        <Route path='/' element={ <Home />} />
+        <Route path='/signup' element={ userData ? <Navigate to='/' /> : <SignUpPage />} />
         <Route path='/login' element={<LoginPage />} />
       </Routes>
     </>
