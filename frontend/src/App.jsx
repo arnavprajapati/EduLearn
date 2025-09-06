@@ -16,6 +16,7 @@ import Courses from './pages/Educator/Courses.jsx'
 import EditCourse from './pages/Educator/EditCourse.jsx'
 import getCreatorCourseData from './hooks/getCreatorCourse.js'
 import getCourseData from './hooks/getCourseData.js'
+import AllCourses from './pages/AllCourses.jsx'
 
 export const serverURL = 'http://localhost:5000'
 
@@ -65,6 +66,11 @@ const App = () => {
         <Route path='/forgot-password' element={<ForgotPassword />} />
 
         <Route path='/dashboard' element={userData?.role === "educator" ? <Dashboard /> : <Navigate to={"/login"} />} />
+
+        <Route
+          path='/all-courses'
+          element={userData ? <AllCourses /> : <Navigate to='/login' />}
+        />
 
         <Route path='/create-course' element={userData?.role === "educator" ? <CreateCourse /> : <Navigate to={"/login"} />} />
 
