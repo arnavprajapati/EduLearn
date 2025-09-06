@@ -10,6 +10,12 @@ import Profile from './pages/Profile.jsx'
 import ForgotPassword from './pages/ForgotPassword.jsx'
 import EditProfile from './pages/EditProfile.jsx'
 import Navbar from './components/Navbar.jsx'
+import Dashboard from './pages/Educator/Dashboard.jsx'
+import CreateCourse from './pages/Educator/CreateCourse.jsx'
+import Courses from './pages/Educator/Courses.jsx'
+import EditCourse from './pages/Educator/EditCourse.jsx'
+import getCreatorCourseData from './hooks/getCreatorCourse.js'
+import getCourseData from './hooks/getCourseData.js'
 
 export const serverURL = 'http://localhost:5000'
 
@@ -18,10 +24,16 @@ const App = () => {
   const location = useLocation()
 
   getCurrentUser()
+  getCreatorCourseData()
+  getCourseData()
+  
   console.log("userdata: ", userData);
 
-  const hideNavbarRoutes = ['/login', '/signup', '/forgot-password']
-  const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname)
+  const hideNavbarRoutes = ['/login', '/signup', '/forgot-password', '/dashboard', '/create-course', '/courses', '/edit-course/:courseId']
+  const shouldShowNavbar = !(
+    hideNavbarRoutes.includes(location.pathname) ||
+    location.pathname.startsWith('/edit-course/')
+  )
 
   return (
     <>
@@ -51,6 +63,15 @@ const App = () => {
         />
 
         <Route path='/forgot-password' element={<ForgotPassword />} />
+
+        <Route path='/dashboard' element={userData?.role === "educator" ? <Dashboard /> : <Navigate to={"/login"} />} />
+
+        <Route path='/create-course' element={userData?.role === "educator" ? <CreateCourse /> : <Navigate to={"/login"} />} />
+
+        <Route path='/courses' element={userData?.role === "educator" ? <Courses /> : <Navigate to={"/login"} />} />
+
+        <Route path='/edit-course/:courseId' element={userData?.role === "educator" ? <EditCourse /> : <Navigate to={"/login"} />} />
+
       </Routes>
     </>
   )
