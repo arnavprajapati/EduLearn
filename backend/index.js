@@ -21,9 +21,11 @@ app.use(express.json());
 
 import authRouter from './routes/authRoute.js';
 import userRouter from './routes/userRoute.js';
+import courseRouter from './routes/courseRoute.js';
 
 app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);
+app.use('/api/course', courseRouter);
 
 app.get('/', (req, res) => {
     res.send('API is running...');
