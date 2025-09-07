@@ -21,7 +21,7 @@ const getPublishedCourses = async (req, res) => {
     try{
         const courses = await Course.find({
             isPublished: true
-        })
+        }).populate("creator", "name email photoUrl role")
         if(!courses){
             return res.status(404).json({ message: "Course not found" })
         }
