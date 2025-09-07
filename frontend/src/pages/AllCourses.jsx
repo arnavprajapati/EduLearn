@@ -5,7 +5,6 @@ import { FiFilter } from 'react-icons/fi';
 import { GiSplitCross } from 'react-icons/gi';
 
 const categories = [
-    { name: 'All', icon: '🌍' },
     { name: 'Web Dev', icon: '💻' },
     { name: 'UI UX Designing', icon: '🎨' },
     { name: 'App Dev', icon: '📱' },
@@ -17,12 +16,12 @@ const categories = [
 ];
 
 const AllCourses = () => {
-    const [activeCategory, setActiveCategory] = useState('All');
+    const [activeCategory, setActiveCategory] = useState('');
     const [showMobileFilter, setShowMobileFilter] = useState(false);
     const { courseData } = useSelector(state => state.course);
 
     const filteredCourses = courseData.filter(course =>
-        activeCategory === 'All' ? true : course.category === activeCategory
+        activeCategory === '' ? true : course.category === activeCategory
     );
 
     const handleCategoryClick = (categoryName) => {
@@ -105,6 +104,8 @@ const AllCourses = () => {
                                 category={course.category}
                                 title={course.title}
                                 price={course.price}
+                                author={course.creator.name}
+                                level={course.level}
                             />
                         ))}
                     </div>
