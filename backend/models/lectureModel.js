@@ -1,55 +1,17 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
-const courseSchema = new mongoose.Schema({
-    title: {
+const lectureSchema = new mongoose.Schema({
+    lectureTitle: {
         type: String,
         required: true
     },
-    subTitle: {
+    videoUrl: {
         type: String
     },
-    description: {
-        type: String
+    isPreviewFree: {
+        type: Boolean
     },
-    subDescription: {
-        type: String
-    },
-    category: {
-        type: String,
-        required: true
-    },
-    level: {
-        type: String,
-        enum: ['Beginner', 'Intermediate', 'Advanced']
-    },
-    price: {
-        type: Number
-    },
-    thumbnail: {
-        type: String
-    },
-    enrolledStudents: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
-    }],
-    lectures: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Lecture"
-    }],
-    creator: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
-    },
-    isPublished: {
-        type: Boolean,
-        default: false
-    },
-    reviews: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Review'
-    }],
-}, { timestamps: true })
+}, { timestamps: true });
 
-const Course = mongoose.model("Course", courseSchema)
-
-export default Course
+const Lecture = mongoose.model("Lecture", lectureSchema);
+export default Lecture;
