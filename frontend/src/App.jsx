@@ -29,13 +29,15 @@ export const serverURL =
 
 const App = () => {
   const { userData } = useSelector((state) => state.user)
-  const location = useLocation()
+  const location = useLocation(
 
-  getCurrentUser()
-  getCreatorCourseData()
-  getCourseData()
-
-
+    useEffect(() => {
+      getCurrentUser();
+      getCreatorCourseData();
+      getCourseData();
+    }, [])
+  )
+  
   console.log("userdata: ", userData);
 
   const hideNavbarRoutes = [
