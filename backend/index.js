@@ -10,8 +10,14 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
 
+const allowedOrigins = [
+    process.env.CLIENT_URL,
+    'http://localhost:5173',
+    'https://edulearnfrontend.onrender.com'
+];
+
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173' || 'https://edulearnfrontend.onrender.com',
+    origin: allowedOrigins,
     credentials: true,
     methods: ['POST', 'GET', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
