@@ -21,6 +21,7 @@ import CreateLecture from './pages/Educator/CreateLecture.jsx'
 import EditLecture from './pages/Educator/EditLecture.jsx'
 import ViewCourse from './pages/ViewCourse.jsx'
 import ViewLecture from './pages/ViewLecture.jsx'
+import { useEffect } from 'react'
 
 export const serverURL =
   window.location.hostname === 'localhost'
@@ -37,7 +38,7 @@ const App = () => {
       getCourseData();
     }, [])
   )
-  
+
   console.log("userdata: ", userData);
 
   const hideNavbarRoutes = [
