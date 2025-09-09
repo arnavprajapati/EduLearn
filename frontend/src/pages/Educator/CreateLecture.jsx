@@ -29,8 +29,8 @@ function CreateLecture() {
             );
 
             dispatch(setLectureData([...lectureData, result.data.lecture]));
-            
             toast.success("Lecture created successfully!");
+            setLectureTitle("");
         } catch (error) {
             console.error(error);
             toast.error(error.response?.data?.message || "Failed to create lecture.");

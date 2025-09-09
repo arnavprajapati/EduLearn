@@ -19,6 +19,7 @@ import getCourseData from './hooks/getCourseData.js'
 import AllCourses from './pages/AllCourses.jsx'
 import CreateLecture from './pages/Educator/CreateLecture.jsx'
 import EditLecture from './pages/Educator/EditLecture.jsx'
+import ViewCourse from './pages/ViewCourse.jsx'
 
 export const serverURL = 'http://localhost:5000'
 
@@ -39,14 +40,15 @@ const App = () => {
     '/forgot-password',
     '/dashboard',
     '/create-course',
-    '/courses'
+    '/courses',
   ]
 
   const shouldShowNavbar = !(
     hideNavbarRoutes.includes(location.pathname) ||
     location.pathname.startsWith('/edit-course/') ||
     location.pathname.startsWith('/create-lecture/') ||
-    location.pathname.startsWith('/edit-lecture/')
+    location.pathname.startsWith('/edit-lecture/') ||
+    location.pathname.startsWith('/view-course/')
   )
 
   return (
@@ -94,6 +96,8 @@ const App = () => {
         <Route path='/create-lecture/:courseId' element={userData?.role === "educator" ? <CreateLecture /> : <Navigate to={"/login"} />} />
 
         <Route path='/edit-lecture/:courseId/:lectureId' element={userData?.role === "educator" ? <EditLecture /> : <Navigate to={"/login"} />} />
+
+        <Route path='/view-course/:courseId' element={<ViewCourse />} />
 
       </Routes>
     </>

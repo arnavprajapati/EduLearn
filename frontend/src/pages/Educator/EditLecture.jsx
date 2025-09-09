@@ -49,38 +49,35 @@ function EditLecture() {
     }
 
     const editLecture = async () => {
-        setLoading(true)
-        const formData = new FormData()
-        formData.append("lectureTitle", lectureTitle)
-        formData.append("isPreviewFree", isPreviewFree)
+        setLoading(true);
+        const formData = new FormData();
+        formData.append("lectureTitle", lectureTitle);
+        formData.append("isPreviewFree", isPreviewFree.toString());
 
         if (videoURL) {
-            formData.append("videoURL", videoURL)
+            formData.append("videoURL", videoURL);
         }
-
         try {
             const result = await axios.post(serverURL + `/api/course/edit-lecture/${lectureId}`, formData, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
-            })
-
+            });
             const updatedLectures = lectureData.map(lecture =>
                 lecture._id === lectureId ? result.data : lecture
-            )
-            dispatch(setLectureData(updatedLectures))
+            );
+            dispatch(setLectureData(updatedLectures));
 
-            toast.success("Lecture updated successfully!")
-            navigate(`/create-lecture/${courseId}`)
+            toast.success("Lecture updated successfully!");
+            navigate(`/create-lecture/${courseId}`);
         } catch (error) {
-            console.error(error)
-            toast.error(error.response?.data?.message || "Failed to update lecture.")
+            console.error(error);
+            toast.error(error.response?.data?.message || "Failed to update lecture.");
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
-
+    };
     const removeLecture = async () => {
         if (!window.confirm("Are you sure you want to remove this lecture? This action cannot be undone.")) {
             return
