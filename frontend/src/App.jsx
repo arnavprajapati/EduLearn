@@ -20,6 +20,7 @@ import AllCourses from './pages/AllCourses.jsx'
 import CreateLecture from './pages/Educator/CreateLecture.jsx'
 import EditLecture from './pages/Educator/EditLecture.jsx'
 import ViewCourse from './pages/ViewCourse.jsx'
+import ViewLecture from './pages/ViewLecture.jsx'
 
 export const serverURL = 'http://localhost:5000'
 
@@ -48,7 +49,8 @@ const App = () => {
     location.pathname.startsWith('/edit-course/') ||
     location.pathname.startsWith('/create-lecture/') ||
     location.pathname.startsWith('/edit-lecture/') ||
-    location.pathname.startsWith('/view-course/')
+    location.pathname.startsWith('/view-course/') ||
+    location.pathname.startsWith('/view-lecture/')
   )
 
   return (
@@ -98,6 +100,8 @@ const App = () => {
         <Route path='/edit-lecture/:courseId/:lectureId' element={userData?.role === "educator" ? <EditLecture /> : <Navigate to={"/login"} />} />
 
         <Route path='/view-course/:courseId' element={<ViewCourse />} />
+
+        <Route path='/view-lecture/:courseId' element={userData ? <ViewLecture /> : <Navigate to={"/login"} />} />
 
       </Routes>
     </>
