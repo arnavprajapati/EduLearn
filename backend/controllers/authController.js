@@ -3,6 +3,20 @@ import User from '../models/usersModel.js'
 import bcrypt from 'bcrypt'
 import sendMail from '../config/sendMail.js'
 
+const getCookieOptions = () => {
+    const isProduction = process.env.NODE_ENV === "production";
+    
+    return {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "None" : "Strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, 
+        ...(isProduction && process.env.COOKIE_DOMAIN && {
+            domain: process.env.COOKIE_DOMAIN
+        })
+    };
+};
+
 const signUp = async (req, res) => {
     const { name, email, password, role } = req.body
     try {
@@ -15,12 +29,7 @@ const signUp = async (req, res) => {
         let user = await User.create({ name, email, password: hashPassword, role })
 
         const token = await generateAuthToken(user._id)
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production", 
-            sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
+        res.cookie("token", token, getCookieOptions())
 
         user = user.toObject()
         delete user.password
@@ -46,12 +55,7 @@ const login = async (req, res) => {
         }
 
         const token = await generateAuthToken(user._id)
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production", 
-            sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
+        res.cookie("token", token, getCookieOptions())
 
         user = user.toObject()
         delete user.password
@@ -65,10 +69,10 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
     try {
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production", 
-            sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
+        res.cookie("token", "", {
+            ...getCookieOptions(),
+            maxAge: 0, 
+            expires: new Date(0) 
         })
         return res.status(200).json({ message: "Logout Successfully" })
     } catch (err) {
