@@ -21,7 +21,6 @@ import CreateLecture from './pages/Educator/CreateLecture.jsx'
 import EditLecture from './pages/Educator/EditLecture.jsx'
 import ViewCourse from './pages/ViewCourse.jsx'
 import ViewLecture from './pages/ViewLecture.jsx'
-import { useEffect } from 'react'
 
 export const serverURL =
   window.location.hostname === 'localhost'
@@ -30,14 +29,12 @@ export const serverURL =
 
 const App = () => {
   const { userData } = useSelector((state) => state.user)
-  const location = useLocation(
+  const location = useLocation()
 
-    useEffect(() => {
-      getCurrentUser();
-      getCreatorCourseData();
-      getCourseData();
-    }, [])
-  )
+  getCurrentUser()
+  getCreatorCourseData()
+  getCourseData()
+
 
   console.log("userdata: ", userData);
 
