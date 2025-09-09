@@ -25,7 +25,7 @@ const Dashboard = () => {
 
                 <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mb-8 flex flex-col md:flex-row items-start md:items-center relative">
                     <button
-                        onClick={() => navigate(-1)} 
+                        onClick={() => navigate('/')} 
                         className="absolute top-4 left-4 text-gray-500 hover:text-black transition-colors duration-200 cursor-pointer"
                         title="Go back"
                     >
