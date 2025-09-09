@@ -6,6 +6,7 @@ import { setSelectedCourseData } from '../store/slice/courseSlice.js';
 import axios from 'axios';
 import { FaLock, FaArrowLeft, FaEnvelope, FaUserTie } from 'react-icons/fa';
 import CourseCard from '../components/CourseCard';
+import { ClipLoader } from 'react-spinners'; 
 
 const ViewCourse = () => {
     const { courseId } = useParams();
@@ -15,7 +16,9 @@ const ViewCourse = () => {
     const [creatorData, setCreatorData] = useState(null);
     const [selectedLecture, setSelectedLecture] = useState(null);
     const [showLockedMessage, setShowLockedMessage] = useState(false);
-    const [selectedCreatorCourse, setSelectedCreatorCourse] = useState([]);
+    
+    // REMOVED: Unnecessary state for selectedCreatorCourse
+    // const [selectedCreatorCourse, setSelectedCreatorCourse] = useState([]);
 
     useEffect(() => {
         const selectedCourse = courseData.find(item => item._id === courseId);
@@ -49,19 +52,26 @@ const ViewCourse = () => {
         }
     }, [selectedCourseData]);
 
-    useEffect(() => {
-        if (creatorData?._id && courseData.length > 0) {
-            const creatorCourses = courseData.filter(
-                (course) =>
-                    course.creator._id === creatorData._id && course._id !== courseId
-            );
-            setSelectedCreatorCourse(creatorCourses);
-        }
-    }, [creatorData, courseData, courseId]);
+    // REMOVED: This useEffect is no longer needed
+    // useEffect(() => {
+    //     if (creatorData?._id && courseData.length > 0) {
+    //         const creatorCourses = courseData.filter(
+    //             (course) =>
+    //                 course.creator._id === creatorData._id && course._id !== courseId
+    //         );
+    //         setSelectedCreatorCourse(creatorCourses);
+    //     }
+    // }, [creatorData, courseData, courseId]);
 
+    // DERIVED STATE: Calculate the creator's courses directly
+    const selectedCreatorCourses = courseData.filter(
+        (course) => creatorData?._id && course.creator._id === creatorData._id && course._id !== courseId
+    );
 
     if (!selectedCourseData) {
-        return <div>Loading course details...</div>;
+        return <div className="flex items-center justify-center w-[100vw] h-[100vh] p-20 text-center text-gray-500">
+                    <ClipLoader color="#3B82F6" size={50} />
+                </div>
     }
 
     const formatSubDescription = (text) => {
@@ -93,7 +103,7 @@ const ViewCourse = () => {
             <div className="container mx-auto max-w-7xl">
                 <div className="flex items-center mb-6">
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={() => navigate('/all-courses')}
                         className="flex items-center text-gray-700 hover:text-gray-900 transition-colors duration-200"
                     >
                         <FaArrowLeft className="text-xl cursor-pointer" />
@@ -196,11 +206,12 @@ const ViewCourse = () => {
                     </div>
                 </div>
 
-                {selectedCreatorCourse.length > 0 && (
+                {/* UPDATED: Using the derived value instead of a state variable */}
+                {selectedCreatorCourses.length > 0 && (
                     <div className="mt-12">
                         <h2 className="text-3xl font-bold text-gray-900 mb-6">More Courses by This Creator</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {selectedCreatorCourse.map(course => (
+                            {selectedCreatorCourses.map(course => (
                                 <CourseCard
                                     key={course._id}
                                     id={course._id}
