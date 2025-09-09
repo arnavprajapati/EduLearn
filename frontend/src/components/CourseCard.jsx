@@ -4,7 +4,7 @@ import { FaSignal } from 'react-icons/fa';
 const CourseCard = ({ image, category, title, price, id, author, level }) => {
     return (
         <Link
-            to={`/course/${id}`}
+            to={`/view-course/${id}`}
             className="block w-full max-w-xs mx-auto bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden group"
         >
             <div className="relative w-full pb-[56.25%] overflow-hidden">
