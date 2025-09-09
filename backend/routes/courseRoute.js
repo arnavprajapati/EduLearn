@@ -1,5 +1,5 @@
 import express from 'express'
-import { createCourse, getPublishedCourses, getCreatorCourses, editCourse, getCourseById, removeCourse, createLecture, getCourseLecture, editLecture, removeLecture, getCreatorById } from '../controllers/courseController.js'
+import { createCourse, getPublishedCourses, getCreatorCourses, editCourse, getCourseById, removeCourse, createLecture, getCourseLecture, editLecture, removeLecture, getCreatorById, getSingleLecture } from '../controllers/courseController.js'
 import isAuth from '../middleware/isAuth.js' 
 import upload from "../middleware/multer.js";
 
@@ -14,8 +14,10 @@ router.delete('/remove-course/:courseId', isAuth, removeCourse)
 
 router.post('/create-lecture/:courseId', isAuth, createLecture)
 router.get('/get-course-lectures/:courseId', isAuth, getCourseLecture)
-router.put('/edit-lecture/:lectureId', isAuth, upload.single("videoURL"), editLecture)
+router.post('/edit-lecture/:lectureId', isAuth, upload.single("videoURL"), editLecture)
 router.delete('/remove-lecture/:lectureId', isAuth, removeLecture)
+
+router.get("/lecture/:lectureId", isAuth, getSingleLecture)
 
 router.post("/get-creator",isAuth, getCreatorById)
 

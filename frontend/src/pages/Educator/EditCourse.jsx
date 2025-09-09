@@ -137,7 +137,7 @@ function EditCourse() {
         <div className="min-h-screen bg-gray-100 p-6 sm:p-10 text-gray-800">
             <div className="w-full max-w-6xl mx-auto bg-white rounded-2xl shadow-xl p-6 sm:p-10 flex flex-col">
                 <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
-                    <button onClick={() => navigate(-1)} className="text-gray-500 hover:text-gray-800 transition-colors duration-200 p-2 rounded-full hover:bg-gray-100">
+                    <button onClick={() => navigate('/courses')} className="text-gray-500 hover:text-gray-800 transition-colors duration-200 p-2 rounded-full hover:bg-gray-100">
                         <FaArrowLeftLong className="w-6 h-6" />
                     </button>
                     <h2 className="text-3xl font-extrabold text-gray-800 flex-1 text-center">

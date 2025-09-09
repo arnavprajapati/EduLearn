@@ -17,6 +17,8 @@ import EditCourse from './pages/Educator/EditCourse.jsx'
 import getCreatorCourseData from './hooks/getCreatorCourse.js'
 import getCourseData from './hooks/getCourseData.js'
 import AllCourses from './pages/AllCourses.jsx'
+import CreateLecture from './pages/Educator/CreateLecture.jsx'
+import EditLecture from './pages/Educator/EditLecture.jsx'
 
 export const serverURL = 'http://localhost:5000'
 
@@ -27,13 +29,24 @@ const App = () => {
   getCurrentUser()
   getCreatorCourseData()
   getCourseData()
-  
+
+
   console.log("userdata: ", userData);
 
-  const hideNavbarRoutes = ['/login', '/signup', '/forgot-password', '/dashboard', '/create-course', '/courses', '/edit-course/:courseId']
+  const hideNavbarRoutes = [
+    '/login',
+    '/signup',
+    '/forgot-password',
+    '/dashboard',
+    '/create-course',
+    '/courses'
+  ]
+
   const shouldShowNavbar = !(
     hideNavbarRoutes.includes(location.pathname) ||
-    location.pathname.startsWith('/edit-course/')
+    location.pathname.startsWith('/edit-course/') ||
+    location.pathname.startsWith('/create-lecture/') ||
+    location.pathname.startsWith('/edit-lecture/')
   )
 
   return (
@@ -77,6 +90,10 @@ const App = () => {
         <Route path='/courses' element={userData?.role === "educator" ? <Courses /> : <Navigate to={"/login"} />} />
 
         <Route path='/edit-course/:courseId' element={userData?.role === "educator" ? <EditCourse /> : <Navigate to={"/login"} />} />
+
+        <Route path='/create-lecture/:courseId' element={userData?.role === "educator" ? <CreateLecture /> : <Navigate to={"/login"} />} />
+
+        <Route path='/edit-lecture/:courseId/:lectureId' element={userData?.role === "educator" ? <EditLecture /> : <Navigate to={"/login"} />} />
 
       </Routes>
     </>

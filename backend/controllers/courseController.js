@@ -13,7 +13,7 @@ const createCourse = async (req, res) => {
             title,
             category,
             creator: req.user
-        })
+        }).populate("creator", "name email photoUrl role")
         return res.status(201).json(course)
     } catch (err) {
         return res.status(500).json({ message: `Failed to create course ${err}` })
@@ -187,6 +187,18 @@ const removeLecture = async (req, res) => {
     }
 }
 
+const getSingleLecture = async (req, res) => {
+    try {
+        const lecture = await Lecture.findById(req.params.lectureId);
+        if (!lecture) {
+            return res.status(404).json({ message: "Lecture not found" });
+        }
+        res.status(200).json(lecture);
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
 //get Creator data
 const getCreatorById = async (req, res) => {
     try {
@@ -206,4 +218,4 @@ const getCreatorById = async (req, res) => {
 };
 
 
-export { createCourse, getPublishedCourses, getCreatorCourses, editCourse, getCourseById, removeCourse, createLecture, getCourseLecture, editLecture, removeLecture, getCreatorById }
+export { createCourse, getPublishedCourses, getCreatorCourses, editCourse, getCourseById, removeCourse, createLecture, getCourseLecture, editLecture, removeLecture, getCreatorById, getSingleLecture}

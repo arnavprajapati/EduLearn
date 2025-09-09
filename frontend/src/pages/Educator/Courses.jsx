@@ -34,7 +34,7 @@ const Courses = () => {
 
                 <div className="flex items-center justify-between p-4 mb-4 bg-white rounded-lg shadow-md">
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={() => navigate('/dashboard')}
                         className="text-gray-500 hover:text-gray-900 transition-colors duration-200"
                         title="Go back"
                     >
