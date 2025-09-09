@@ -6,20 +6,45 @@ import { setSelectedCourseData } from '../store/slice/courseSlice.js';
 import axios from 'axios';
 import { FaLock, FaArrowLeft, FaEnvelope, FaUserTie } from 'react-icons/fa';
 import CourseCard from '../components/CourseCard';
-import { ClipLoader } from 'react-spinners'; 
+import { ClipLoader } from 'react-spinners';
+import { toast } from 'react-toastify';
 
 const ViewCourse = () => {
     const { courseId } = useParams();
     const navigate = useNavigate();
     const { courseData, selectedCourseData } = useSelector(state => state.course);
     const dispatch = useDispatch();
+    const { userData } = useSelector(state => state.user);
     const [creatorData, setCreatorData] = useState(null);
     const [selectedLecture, setSelectedLecture] = useState(null);
     const [showLockedMessage, setShowLockedMessage] = useState(false);
-    
-    // REMOVED: Unnecessary state for selectedCreatorCourse
-    // const [selectedCreatorCourse, setSelectedCreatorCourse] = useState([]);
+    const [isEnrolled, setIsEnrolled] = useState(false);
+    const { lectureData } = useSelector(state => state.lecture)
 
+    const fetchCourseData = async () => {
+        courseData.map((item) => {
+            if (item._id === courseId) {
+                dispatch(setSelectedCourseData(item))
+                console.log(selectedCourseData)
+                return null;
+            }
+        })
+    }
+
+    const checkEnrollment = () => {
+        const verify = userData?.enrolledCourses?.some(c => {
+            const enrolledId = typeof c === 'string' ? c : c._id;
+            return enrolledId?.toString() === courseId?.toString();
+        });
+        console.log("Enrollment verified:", verify);
+        if (verify) {
+            setIsEnrolled(true);
+        }
+    };
+
+    // This useEffect and the one below are moved to the top
+    // to ensure all hooks are called on every render, as per
+    // the Rules of Hooks. This fixes the "change in order of hooks" error.
     useEffect(() => {
         const selectedCourse = courseData.find(item => item._id === courseId);
         if (selectedCourse) {
@@ -52,26 +77,22 @@ const ViewCourse = () => {
         }
     }, [selectedCourseData]);
 
-    // REMOVED: This useEffect is no longer needed
-    // useEffect(() => {
-    //     if (creatorData?._id && courseData.length > 0) {
-    //         const creatorCourses = courseData.filter(
-    //             (course) =>
-    //                 course.creator._id === creatorData._id && course._id !== courseId
-    //         );
-    //         setSelectedCreatorCourse(creatorCourses);
-    //     }
-    // }, [creatorData, courseData, courseId]);
+    // ✅ This useEffect was moved here to fix the bug.
+    // It must be called unconditionally before any early return statements.
+    useEffect(() => {
+        fetchCourseData()
+        checkEnrollment()
+    }, [courseId, courseData, lectureData])
 
-    // DERIVED STATE: Calculate the creator's courses directly
     const selectedCreatorCourses = courseData.filter(
         (course) => creatorData?._id && course.creator._id === creatorData._id && course._id !== courseId
     );
 
+    // ⚠️ Conditional rendering is now done after all the hooks have been called.
     if (!selectedCourseData) {
         return <div className="flex items-center justify-center w-[100vw] h-[100vh] p-20 text-center text-gray-500">
-                    <ClipLoader color="#3B82F6" size={50} />
-                </div>
+            <ClipLoader color="#3B82F6" size={50} />
+        </div>
     }
 
     const formatSubDescription = (text) => {
@@ -98,6 +119,44 @@ const ViewCourse = () => {
         }
     };
 
+    const handleEnroll = async (courseId, userId) => {
+        try {
+            const orderData = await axios.post(serverURL + "/api/payment/create-order", {
+                courseId,
+                userId
+            }, { withCredentials: true });
+            console.log(orderData)
+            const options = {
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                amount: orderData.data.amount,
+                currency: "INR",
+                name: "EduLearn",
+                description: "Course Enrollment Payment",
+                order_id: orderData.data.id,
+                handler: async function (response) {
+                    console.log("Razorpay Response:", response);
+                    try {
+                        const verifyRes = await axios.post(serverURL + "/api/payment/verify-payment", {
+                            ...response,
+                            courseId,
+                            userId
+                        }, { withCredentials: true });
+                        setIsEnrolled(true)
+                        toast.success(verifyRes.data.message);
+                    } catch (verifyError) {
+                        toast.error("Payment verification failed.");
+                        console.error("Verification Error:", verifyError);
+                    }
+                },
+            };
+            const rzp = new window.Razorpay(options)
+            rzp.open()
+        } catch (err) {
+            toast.error("Something went wrong while enrolling.");
+            console.error("Enroll Error:", err);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
             <div className="container mx-auto max-w-7xl">
@@ -115,44 +174,53 @@ const ViewCourse = () => {
                 <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                     <div className="flex flex-col lg:flex-row">
                         <div className="w-full lg:w-2/3 p-6 bg-gray-100 rounded-tl-xl lg:rounded-l-xl">
-                            <div className="aspect-video bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-                                {selectedLecture && selectedLecture.isPreviewFree ? (
-                                    <video controls className="w-full h-full" src={selectedLecture.videoUrl} autoPlay></video>
-                                ) : (
-                                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-700 text-lg p-4 text-center">
-                                        <FaLock className="text-4xl mb-4 text-gray-400" />
-                                        <span>This lecture is locked. It is only available for enrolled students.</span>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
-                                <h2 className="text-2xl font-semibold text-gray-800 mb-4">Course Content</h2>
-                                <ul className="space-y-3 max-h-96 overflow-y-auto">
-                                    {selectedCourseData.lectures.map((lecture, index) => (
-                                        <li
-                                            key={lecture._id}
-                                            className={`flex items-center justify-between p-4 rounded-lg cursor-pointer transition-colors duration-200 ${
-                                                (selectedLecture?._id === lecture._id && lecture.isPreviewFree)
+                            {selectedCourseData.lectures.length === 0 ? (
+                                <div className="aspect-video bg-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-700 p-4 text-center">
+                                    <h2 className="text-xl font-semibold mb-2">No Lectures Yet</h2>
+                                    <p className="text-gray-600">This course has no lectures yet. New lectures will be added soon!</p>
+                                </div>
+                            ) : (
+                                <div className="aspect-video bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                                    {selectedLecture && selectedLecture.isPreviewFree ? (
+                                        <video controls className="w-full h-full" src={selectedLecture.videoUrl} autoPlay></video>
+                                    ) : (
+                                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-700 text-lg p-4 text-center">
+                                            <FaLock className="text-4xl mb-4 text-gray-400" />
+                                            <span>This lecture is locked. It is only available for enrolled students.</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {selectedCourseData.lectures.length > 0 && (
+                                <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+                                    <h2 className="text-2xl font-semibold text-gray-800 mb-4">Course Content</h2>
+                                    <ul className="space-y-3 max-h-96 overflow-y-auto">
+                                        {selectedCourseData.lectures.map((lecture, index) => (
+                                            <li
+                                                key={lecture._id}
+                                                className={`flex items-center justify-between p-4 rounded-lg cursor-pointer transition-colors duration-200 ${(selectedLecture?._id === lecture._id && lecture.isPreviewFree)
                                                     ? 'bg-gray-800 text-white'
                                                     : 'bg-white text-gray-700 hover:bg-gray-100'
-                                                }`}
-                                            onClick={() => handleLectureClick(lecture)}
-                                        >
-                                            <div className="flex items-center">
-                                                <span className={`text-lg font-medium mr-3 ${selectedLecture?._id === lecture._id ? 'text-white' : 'text-gray-500'}`}>{index + 1}.</span>
-                                                <span className="flex-1 text-lg font-medium">{lecture.lectureTitle}</span>
-                                            </div>
-                                            {lecture.isPreviewFree ? (
-                                                <span className="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full">
-                                                    Free Preview
-                                                </span>
-                                            ) : (
-                                                <FaLock className="text-gray-400" />
-                                            )}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
+                                                    }`}
+                                                onClick={() => handleLectureClick(lecture)}
+                                            >
+                                                <div className="flex items-center">
+                                                    <span className={`text-lg font-medium mr-3 ${selectedLecture?._id === lecture._id ? 'text-white' : 'text-gray-500'}`}>{index + 1}.</span>
+                                                    <span className="flex-1 text-lg font-medium">{lecture.lectureTitle}</span>
+                                                </div>
+                                                {lecture.isPreviewFree ? (
+                                                    <span className="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full">
+                                                        Free Preview
+                                                    </span>
+                                                ) : (
+                                                    <FaLock className="text-gray-400" />
+                                                )}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                         </div>
 
                         <div className="w-full lg:w-1/3 p-6">
@@ -163,10 +231,20 @@ const ViewCourse = () => {
                             />
                             <h2 className="text-2xl font-bold text-gray-800 mb-1">{selectedCourseData.title}</h2>
                             <p className="text-xl text-gray-600 mb-4">{selectedCourseData.subTitle}</p>
-                            <button className="w-full bg-gray-800 text-white text-lg font-semibold py-3 rounded-lg hover:bg-black transition-colors duration-300 mb-6 cursor-pointer">
-                                Enroll Now 
-                            </button>
-                            
+                            {
+                                !isEnrolled ? <button className="w-full bg-gray-800 text-white text-lg font-semibold py-3 rounded-lg hover:bg-black transition-colors duration-300 mb-6 cursor-pointer"
+                                    onClick={() => {
+                                        handleEnroll(courseId, userData._id)
+                                    }}>
+                                    Enroll Now
+                                </button> : <button className="w-full bg-gray-800 text-white text-lg font-semibold py-3 rounded-lg hover:bg-black transition-colors duration-300 mb-6 cursor-pointer"
+                                    onClick={() => {
+                                        navigate(`/view-lecture/${courseId}`)
+                                    }}>
+                                    Watch Now
+                                </button>
+                            }
+
                             <div className="mb-6">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-2">Description</h3>
                                 <p className="text-gray-700 leading-relaxed">{selectedCourseData.description}</p>
@@ -176,7 +254,7 @@ const ViewCourse = () => {
                                 <h3 className="text-lg font-semibold text-gray-800 mb-2">Modules</h3>
                                 {formatSubDescription(selectedCourseData.subDescription)}
                             </div>
-                            
+
                             {creatorData && (
                                 <div className="p-4 bg-gray-100 rounded-lg">
                                     <div className="flex items-center mb-4">
@@ -206,7 +284,6 @@ const ViewCourse = () => {
                     </div>
                 </div>
 
-                {/* UPDATED: Using the derived value instead of a state variable */}
                 {selectedCreatorCourses.length > 0 && (
                     <div className="mt-12">
                         <h2 className="text-3xl font-bold text-gray-900 mb-6">More Courses by This Creator</h2>
