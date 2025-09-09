@@ -22,7 +22,10 @@ import EditLecture from './pages/Educator/EditLecture.jsx'
 import ViewCourse from './pages/ViewCourse.jsx'
 import ViewLecture from './pages/ViewLecture.jsx'
 
-export const serverURL = 'http://localhost:5000'
+export const serverURL =
+  window.location.hostname === 'localhost'
+    ? 'http://localhost:5000'
+    : 'https://edulearn-i65q.onrender.com';
 
 const App = () => {
   const { userData } = useSelector((state) => state.user)
