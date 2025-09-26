@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setUserData } from '../store/slice/userSlice.js';
 import axios from 'axios';
 import { serverURL } from '../App.jsx';
+import Logo from '../assets/image/logo.png';
 
 const Navbar = () => {
     const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -42,16 +43,14 @@ const Navbar = () => {
         <nav className="fixed top-0 left-0 w-full h-[70px] flex items-center justify-between px-5 md:px-20 bg-white shadow-md z-50">
             <div className="flex-1">
                 <Link to="/" className="text-xl font-bold text-gray-800 tracking-wide" onClick={() => setShowMobileMenu(false)}>
-                    EduLearn
+                    <img src={Logo} alt="EduLearn Logo" className="h-17" />
                 </Link>
             </div>
 
             <div className="hidden lg:flex items-center space-x-6">
                 {userData ? (
                     <>
-                        {userData.role === 'educator' && (
                             <NavLink to="/dashboard" text="Dashboard" icon={AiOutlineDashboard} />
-                        )}
                         <Link
                             to="/profile"
                             className="flex items-center text-gray-600 hover:text-indigo-600 transition-colors duration-200"

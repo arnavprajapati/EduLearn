@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { serverURL } from '../App.jsx';
 import { setSelectedCourseData } from '../store/slice/courseSlice.js';
+import { setLectureData } from '../store/slice/lectureSlice.js'; // 👇 ADDED: setLectureData action import
 import axios from 'axios';
 import { FaLock, FaArrowLeft, FaEnvelope, FaUserTie } from 'react-icons/fa';
 import CourseCard from '../components/CourseCard';
@@ -21,6 +22,8 @@ const ViewCourse = () => {
     const [isEnrolled, setIsEnrolled] = useState(false);
     const { lectureData } = useSelector(state => state.lecture)
 
+    // Note: fetchCourseData() is redundant but kept for original structure integrity.
+    // The actual state update is handled by the first useEffect below.
     const fetchCourseData = async () => {
         courseData.map((item) => {
             if (item._id === courseId) {
@@ -42,9 +45,7 @@ const ViewCourse = () => {
         }
     };
 
-    // This useEffect and the one below are moved to the top
-    // to ensure all hooks are called on every render, as per
-    // the Rules of Hooks. This fixes the "change in order of hooks" error.
+    // 1. useEffect for setting selectedCourseData (Kept clean)
     useEffect(() => {
         const selectedCourse = courseData.find(item => item._id === courseId);
         if (selectedCourse) {
@@ -52,6 +53,38 @@ const ViewCourse = () => {
         }
     }, [courseId, courseData, dispatch]);
 
+    // 👇 2. NEW useEffect to Fetch and Set Lecture Data in Redux Store
+    useEffect(() => {
+        const fetchLectures = async () => {
+            if (selectedCourseData && selectedCourseData._id) {
+                try {
+                    // Using the existing route to fetch a course with lectures populated
+                    const res = await axios.get(
+                        `${serverURL}/api/course/get-course-lectures/${selectedCourseData._id}`,
+                        { withCredentials: true }
+                    );
+
+                    if (res.data && res.data.lectures) {
+                        // 👇 ADDED: Redux Store main lecture kiya 
+                        dispatch(setLectureData(res.data.lectures));
+                    } else {
+                        // Handle case where course is found but has no lecture data
+                        dispatch(setLectureData([]));
+                    }
+                } catch (error) {
+                    console.error("Error fetching lectures:", error);
+                }
+            }
+        };
+
+        // Only run this if the selectedCourseData is available
+        if (selectedCourseData && selectedCourseData._id) {
+            fetchLectures();
+        }
+
+    }, [selectedCourseData, dispatch]); // Added dispatch as dependency
+
+    // 3. useEffect for fetching Creator Data (Unchanged)
     useEffect(() => {
         const getCreator = async () => {
             if (selectedCourseData?.creator) {
@@ -70,21 +103,26 @@ const ViewCourse = () => {
         getCreator();
     }, [selectedCourseData]);
 
+    // 4. useEffect for initial selected lecture setting (Modified to use lectureData from store)
     useEffect(() => {
-        if (selectedCourseData && selectedCourseData.lectures.length > 0) {
-            const firstFreeLecture = selectedCourseData.lectures.find(lecture => lecture.isPreviewFree);
-            setSelectedLecture(firstFreeLecture || selectedCourseData.lectures[0]);
-        }
-    }, [selectedCourseData]);
+        // 👇 MODIFIED: Use the lectureData from the Redux store if available, otherwise use the one from selectedCourseData
+        const lecturesSource = lectureData.length > 0 ? lectureData : selectedCourseData?.lectures || [];
 
-    // ✅ This useEffect was moved here to fix the bug.
-    // It must be called unconditionally before any early return statements.
+        if (lecturesSource.length > 0) {
+            const firstFreeLecture = lecturesSource.find(lecture => lecture.isPreviewFree);
+            setSelectedLecture(firstFreeLecture || lecturesSource[0]);
+        }
+    }, [selectedCourseData, lectureData]); // Added lectureData dependency
+
+    // 5. useEffect for enrollment check (Simplified)
     useEffect(() => {
-        fetchCourseData()
-        checkEnrollment()
-    }, [courseId, courseData, lectureData])
+        // Run checkEnrollment whenever courseId or userData changes
+        checkEnrollment();
+    }, [courseId, userData]);
+
 
     const selectedCreatorCourses = courseData.filter(
+        // The check remains the same
         (course) => creatorData?._id && course.creator._id === creatorData._id && course._id !== courseId
     );
 
@@ -110,12 +148,14 @@ const ViewCourse = () => {
     };
 
     const handleLectureClick = (lecture) => {
-        if (lecture.isPreviewFree) {
+        // 👇 MODIFIED: Check if enrolled OR if the lecture is free
+        if (isEnrolled || lecture.isPreviewFree) {
             setSelectedLecture(lecture);
             setShowLockedMessage(false);
         } else {
             setSelectedLecture(null);
             setShowLockedMessage(true);
+            toast.info("Please enroll to view locked lectures."); // Added user feedback
         }
     };
 
@@ -157,6 +197,9 @@ const ViewCourse = () => {
         }
     };
 
+    // 👇 MODIFIED: Use lectureData from Redux for rendering course content list
+    const lecturesToDisplay = lectureData.length > 0 ? lectureData : selectedCourseData.lectures;
+
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
             <div className="container mx-auto max-w-7xl">
@@ -166,7 +209,7 @@ const ViewCourse = () => {
                         className="flex items-center text-gray-700 hover:text-gray-900 transition-colors duration-200"
                     >
                         <FaArrowLeft className="text-xl cursor-pointer" />
-                        <span className="ml-2 text-lg font-medium cursor-pointer">Back to My Courses</span>
+                        <span className="ml-2 text-lg font-medium cursor-pointer">Back to Courses</span>
                     </button>
                     <h1 className="text-3xl font-bold text-gray-900 ml-auto mr-auto">{selectedCourseData.title}</h1>
                 </div>
@@ -174,34 +217,35 @@ const ViewCourse = () => {
                 <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                     <div className="flex flex-col lg:flex-row">
                         <div className="w-full lg:w-2/3 p-6 bg-gray-100 rounded-tl-xl lg:rounded-l-xl">
-                            {selectedCourseData.lectures.length === 0 ? (
+                            {lecturesToDisplay.length === 0 ? (
                                 <div className="aspect-video bg-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-700 p-4 text-center">
                                     <h2 className="text-xl font-semibold mb-2">No Lectures Yet</h2>
                                     <p className="text-gray-600">This course has no lectures yet. New lectures will be added soon!</p>
                                 </div>
                             ) : (
                                 <div className="aspect-video bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-                                    {selectedLecture && selectedLecture.isPreviewFree ? (
+                                    {/* 👇 MODIFIED: Check if enrolled OR if the lecture is free */}
+                                    {selectedLecture && (isEnrolled || selectedLecture.isPreviewFree) ? (
                                         <video controls className="w-full h-full" src={selectedLecture.videoUrl} autoPlay></video>
                                     ) : (
                                         <div className="w-full h-full flex flex-col items-center justify-center text-gray-700 text-lg p-4 text-center">
                                             <FaLock className="text-4xl mb-4 text-gray-400" />
-                                            <span>This lecture is locked. It is only available for enrolled students.</span>
+                                            <span>This content is locked. Please enroll to access all lectures.</span>
                                         </div>
                                     )}
                                 </div>
                             )}
 
-                            {selectedCourseData.lectures.length > 0 && (
+                            {lecturesToDisplay.length > 0 && (
                                 <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
                                     <h2 className="text-2xl font-semibold text-gray-800 mb-4">Course Content</h2>
                                     <ul className="space-y-3 max-h-96 overflow-y-auto">
-                                        {selectedCourseData.lectures.map((lecture, index) => (
+                                        {lecturesToDisplay.map((lecture, index) => (
                                             <li
                                                 key={lecture._id}
-                                                className={`flex items-center justify-between p-4 rounded-lg cursor-pointer transition-colors duration-200 ${(selectedLecture?._id === lecture._id && lecture.isPreviewFree)
-                                                    ? 'bg-gray-800 text-white'
-                                                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                                                className={`flex items-center justify-between p-4 rounded-lg cursor-pointer transition-colors duration-200 ${selectedLecture?._id === lecture._id
+                                                        ? 'bg-gray-800 text-white'
+                                                        : 'bg-white text-gray-700 hover:bg-gray-100'
                                                     }`}
                                                 onClick={() => handleLectureClick(lecture)}
                                             >
@@ -209,7 +253,12 @@ const ViewCourse = () => {
                                                     <span className={`text-lg font-medium mr-3 ${selectedLecture?._id === lecture._id ? 'text-white' : 'text-gray-500'}`}>{index + 1}.</span>
                                                     <span className="flex-1 text-lg font-medium">{lecture.lectureTitle}</span>
                                                 </div>
-                                                {lecture.isPreviewFree ? (
+                                                {/* 👇 MODIFIED: Logic for displaying lock/free/unlocked status */}
+                                                {isEnrolled ? (
+                                                    <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-3 py-1 rounded-full">
+                                                        Unlocked
+                                                    </span>
+                                                ) : lecture.isPreviewFree ? (
                                                     <span className="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full">
                                                         Free Preview
                                                     </span>

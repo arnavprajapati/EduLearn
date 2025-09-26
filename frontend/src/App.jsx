@@ -10,7 +10,7 @@ import Profile from './pages/Profile.jsx'
 import ForgotPassword from './pages/ForgotPassword.jsx'
 import EditProfile from './pages/EditProfile.jsx'
 import Navbar from './components/Navbar.jsx'
-import Dashboard from './pages/Educator/Dashboard.jsx'
+import Dashboard from './pages/Dashboard.jsx'
 import CreateCourse from './pages/Educator/CreateCourse.jsx'
 import Courses from './pages/Educator/Courses.jsx'
 import EditCourse from './pages/Educator/EditCourse.jsx'
@@ -21,6 +21,7 @@ import CreateLecture from './pages/Educator/CreateLecture.jsx'
 import EditLecture from './pages/Educator/EditLecture.jsx'
 import ViewCourse from './pages/ViewCourse.jsx'
 import ViewLecture from './pages/ViewLecture.jsx'
+import MyCourses from './pages/MyCourses.jsx'
 
 export const serverURL =
   window.location.hostname === 'localhost'
@@ -85,7 +86,7 @@ const App = () => {
 
         <Route path='/forgot-password' element={<ForgotPassword />} />
 
-        <Route path='/dashboard' element={userData?.role === "educator" ? <Dashboard /> : <Navigate to={"/login"} />} />
+        <Route path='/dashboard' element={userData?  <Dashboard /> : <Navigate to={"/login"} />} />
 
         <Route
           path='/all-courses'
@@ -103,6 +104,7 @@ const App = () => {
         <Route path='/edit-lecture/:courseId/:lectureId' element={userData?.role === "educator" ? <EditLecture /> : <Navigate to={"/login"} />} />
 
         <Route path='/view-course/:courseId' element={<ViewCourse />} />
+        <Route path='/my-courses' element={<MyCourses />} />
 
         <Route path='/view-lecture/:courseId' element={userData ? <ViewLecture /> : <Navigate to={"/login"} />} />
 

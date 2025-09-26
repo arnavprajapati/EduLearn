@@ -57,7 +57,7 @@ const CourseCard = ({ image, category, title, price, id, author, level }) => {
                                 ₹{price}
                             </p>
                             <button
-                                className="flex items-center gap-1.5 bg-gray-900 text-white text-sm font-semibold py-2 px-4 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-700 transition-all duration-300"
+                                className="flex items-center gap-1.5 bg-gray-900 text-white text-sm font-semibold py-2 px-4 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-700 transition-all duration-300 cursor-pointer"
                                 aria-label={`View details for ${title}`}
                             >
                                 View Details

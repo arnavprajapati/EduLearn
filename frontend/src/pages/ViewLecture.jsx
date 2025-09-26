@@ -37,7 +37,7 @@ function ViewLecture() {
                         className="flex items-center text-gray-600 hover:text-gray-900 transition-colors duration-200"
                     >
                         <FaArrowLeftLong className="text-xl mr-2" />
-                        <span className="text-lg font-medium">Back to Course Details</span>
+                        <span className="text-lg font-medium cursor-pointer">Back to Course Details</span>
                     </button>
                 </div>
 
@@ -73,7 +73,7 @@ function ViewLecture() {
                                     <button
                                         key={lecture._id}
                                         onClick={() => setSelectedLecture(lecture)}
-                                        className={`flex items-center justify-start w-full p-4 rounded-xl border transition-all duration-300  ${
+                                        className={`flex items-center justify-start w-full p-4 rounded-xl border cursor-pointer transition-all duration-300  ${
                                             selectedLecture?._id === lecture._id
                                                 ? 'bg-gray-800 text-white shadow-lg'
                                                 : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-200'
